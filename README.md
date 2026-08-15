@@ -4,6 +4,10 @@
 
 It covers a provider WAF, adaptive rate limiting, a DDoS response plan, and real verification.
 
+One core skill routes to a focused guide for Vercel, Netlify, or Cloudflare.
+
+It uses the hosting provider's native controls and checks the live plan before making changes.
+
 ## Install
 
 Copy `skills/harden-web-app` into the `skills` folder used by your AI coding tool.
@@ -19,6 +23,8 @@ Use $harden-web-app to protect this web app from abusive traffic and DDoS attack
 ```
 
 The skill inspects the real project and provider before changing anything.
+
+It will not stack Cloudflare in front of Vercel as a security shortcut.
 
 It never claims that a WAF alone makes an app DDoS-proof.
 

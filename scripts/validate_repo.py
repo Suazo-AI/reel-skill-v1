@@ -20,8 +20,26 @@ REQUIRED_FILES = [
     ".github/workflows/ci.yml",
     "skills/harden-web-app/SKILL.md",
     "skills/harden-web-app/agents/openai.yaml",
+    "skills/harden-web-app/references/cloudflare.md",
+    "skills/harden-web-app/references/netlify.md",
+    "skills/harden-web-app/references/vercel.md",
     "skills/harden-web-app/references/verification.md",
 ]
+
+PROVIDER_GUIDES = {
+    "cloudflare": {
+        "url": "https://developers.cloudflare.com/waf/",
+        "deprecated_terms": ["cloudflare_firewall_rule", "cloudflare_filter"],
+    },
+    "netlify": {
+        "url": "https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/",
+        "deprecated_terms": [],
+    },
+    "vercel": {
+        "url": "https://vercel.com/docs/vercel-firewall",
+        "deprecated_terms": [],
+    },
+}
 
 passes: list[str] = []
 failures: list[str] = []
@@ -57,8 +75,25 @@ def main() -> int:
         check("skill name matches folder", metadata.get("name") == "harden-web-app")
         check("description explains when to use", "Use when" in metadata.get("description", ""))
         check("skill stays under 500 lines", len(text.splitlines()) < 500)
-        check("skill links its reference", "references/verification.md" in text)
+        references = ["verification.md", "vercel.md", "netlify.md", "cloudflare.md"]
+        for reference in references:
+            check(f"skill links {reference}", f"references/{reference}" in text)
         check("skill has no template TODOs", "TODO" not in text)
+
+    for provider, contract in PROVIDER_GUIDES.items():
+        path = SKILL / "references" / f"{provider}.md"
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        check(f"{provider} guide cites official docs", contract["url"] in text)
+        check(f"{provider} guide has plan gate", "## Plan gate" in text)
+        check(f"{provider} guide has verification", "## Verification" in text)
+        check(f"{provider} guide has rollback", "## Rollback" in text)
+        for term in contract["deprecated_terms"]:
+            check(
+                f"{provider} guide marks {term} deprecated",
+                term in text and "deprecated" in text,
+            )
 
     openai_yaml = SKILL / "agents" / "openai.yaml"
     if openai_yaml.is_file():
