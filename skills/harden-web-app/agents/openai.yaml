@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harden Web App"
+  short_description: "Protect web apps from abusive traffic"
+  default_prompt: "Use $harden-web-app to protect this web app from abusive traffic and DDoS attacks."
