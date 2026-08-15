@@ -19,9 +19,35 @@ Never promise that any control makes a system DDoS-proof.
 - Test with staging or a small approved load.
 - Never launch an uncontrolled load test against production.
 
-## 1. Map the traffic path
+## 1. Find the edge owner
 
 Identify the public hostname, CDN or reverse proxy, load balancer, origin, and every public API entry point.
+
+Use the deployed hostname, DNS, response headers, linked provider project, and live provider configuration as evidence.
+
+Treat repository markers as clues, not proof:
+
+- Vercel: `.vercel/project.json` or `vercel.json`.
+- Netlify: `.netlify/state.json` or `netlify.toml`.
+- Cloudflare: `wrangler.toml`, `wrangler.json`, or `wrangler.jsonc`.
+
+Select the provider that owns the public edge.
+
+Read the matching guide for each public hostname before proposing provider controls:
+
+- [Vercel](references/vercel.md)
+- [Netlify](references/netlify.md)
+- [Cloudflare](references/cloudflare.md)
+
+If several providers appear in the repository, trace each public hostname before choosing its guide.
+
+Do not blend provider steps for one hostname.
+
+Do not put Cloudflare or another reverse proxy in front of Vercel as a security shortcut.
+
+If no guide matches, keep this core workflow and check the current official provider documentation.
+
+## 2. Map the exposed path
 
 Find existing WAF rules, rate limits, logs, alerts, health checks, webhooks, authentication routes, and expensive endpoints.
 
@@ -31,7 +57,7 @@ Record the normal request rate and legitimate peak when evidence exists.
 
 If no baseline exists, use conservative starting values and label them as assumptions.
 
-## 2. Put a WAF before the full stack
+## 3. Put a WAF before the full stack
 
 Prefer the hosting provider or CDN's managed WAF when it covers every public hostname.
 
@@ -45,7 +71,7 @@ Add the smallest custom rules needed for observed malicious patterns.
 
 Keep a tested rollback for every blocking rule.
 
-## 3. Add adaptive rate limiting
+## 4. Add adaptive rate limiting
 
 Layer limits instead of relying on one global number.
 
@@ -64,7 +90,7 @@ Define how limits fail when the counter store or provider is unavailable.
 
 Choose fail-open or fail-closed per route based on customer impact and security risk.
 
-## 4. Write the DDoS response plan
+## 5. Write the DDoS response plan
 
 Create `docs/ddos-response.md` in the target project unless its documentation uses another clear location.
 
@@ -81,7 +107,7 @@ Include these facts:
 
 Leave unknown people, contacts, URLs, and thresholds as explicit blanks.
 
-## 5. Verify the real path
+## 6. Verify the real path
 
 Read [references/verification.md](references/verification.md) before testing.
 
@@ -89,7 +115,11 @@ Verify that the public hostname reaches the WAF and that the origin cannot be re
 
 Exercise requests below, at, and above each limit.
 
-Confirm the response code, `Retry-After`, logs, alerts, counter sharing, expiry, and recovery.
+Confirm the response code, logs, alerts, counter sharing, expiry, and recovery.
+
+Record whether the provider emits `Retry-After`.
+
+Add that header in application code when the app owns the `429` response and clients need retry guidance.
 
 Recheck login, checkout, webhooks, health checks, and other critical legitimate flows.
 

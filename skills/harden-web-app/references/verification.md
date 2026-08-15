@@ -24,7 +24,7 @@ Run each case against one safe endpoint.
 |---|---|
 | Below the limit | Normal success response |
 | At the limit | Documented boundary behavior |
-| Above the limit | `429` and a valid `Retry-After` |
+| Above the limit | `429`; record whether `Retry-After` is present |
 | Short burst | Burst policy works as designed |
 | After expiry | Normal access returns |
 | Same identity from another IP | Identity rule still applies |
@@ -47,3 +47,5 @@ Run each case against one safe endpoint.
 Save the command, timestamp, exit code, response headers, matched rule ID, log query, alert receipt, and rollback result.
 
 Redact tokens, cookies, private addresses, customer data, and account secrets.
+
+Use the selected provider guide for its dashboard, log, and rollback checks.
